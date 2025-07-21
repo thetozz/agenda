@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Início | Agenda Médica{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="mt-4">Bem-vindo ao Sistema de Agenda Médica</h1>
+    <p class="lead">Gerencie especialidades, médicos, pacientes e consultas de forma simples e eficiente.</p>
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-2 mb-3">
+            <a href="{% url 'especialidade_list' %}" class="btn btn-outline-primary w-100">Especialidades</a>
+        </div>
+        <div class="col-md-2 mb-3">
+            <a href="{% url 'medico_list' %}" class="btn btn-outline-primary w-100">Médicos</a>
+        </div>
+        <div class="col-md-2 mb-3">
+            <a href="{% url 'paciente_list' %}" class="btn btn-outline-primary w-100">Pacientes</a>
+        </div>
+        <div class="col-md-2 mb-3">
+            <a href="{% url 'consulta_list' %}" class="btn btn-outline-primary w-100">Consultas</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
