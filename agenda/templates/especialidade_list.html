@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Especialidades - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <h1><i class="bi bi-tags me-3"></i>Especialidades Médicas</h1>
+    <p class="lead">Gerencie as especialidades médicas do sistema</p>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Lista de Especialidades</h3>
+            <a href="{% url 'especialidade_create' %}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Nova Especialidade
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                {% if especialidade_list %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th>Médicos</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for especialidade in especialidade_list %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ especialidade.nome }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if especialidade.descricao %}
+                                            {{ especialidade.descricao|truncatewords:10 }}
+                                        {% else %}
+                                            <em class="text-muted">Sem descrição</em>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ especialidade.medicos.count }} médico{{ especialidade.medicos.count|pluralize }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'especialidade_detail' especialidade.pk %}" 
+                                               class="btn btn-outline-primary btn-sm" title="Ver detalhes">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'especialidade_update' especialidade.pk %}" 
+                                               class="btn btn-outline-warning btn-sm" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'especialidade_delete' especialidade.pk %}" 
+                                               class="btn btn-outline-danger btn-sm" title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-tags display-1 text-muted"></i>
+                        <h4 class="mt-3 text-muted">Nenhuma especialidade cadastrada</h4>
+                        <p class="text-muted">Comece adicionando uma nova especialidade médica.</p>
+                        <a href="{% url 'especialidade_create' %}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-2"></i>Adicionar Primeira Especialidade
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

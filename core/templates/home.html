@@ -1,23 +1,136 @@
 {% extends 'base.html' %}
 
-{% block title %}Início | Agenda Médica{% endblock %}
+{% block title %}Início - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="mt-4">Bem-vindo ao Sistema de Agenda Médica</h1>
-    <p class="lead">Gerencie especialidades, médicos, pacientes e consultas de forma simples e eficiente.</p>
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-2 mb-3">
-            <a href="{% url 'especialidade_list' %}" class="btn btn-outline-primary w-100">Especialidades</a>
+<div class="page-header text-center">
+    <h1><i class="bi bi-house-heart me-3"></i>Sistema de Agenda Médica</h1>
+    <p class="lead">Gerencie consultas, pacientes e médicos de forma eficiente</p>
+</div>
+
+<div class="row">
+    <!-- Dashboard Cards -->
+    <div class="col-md-3 mb-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-calendar-check display-4 text-primary mb-3"></i>
+                <h5 class="card-title">Consultas</h5>
+                <p class="card-text">Gerencie agendamentos e consultas médicas</p>
+                <a href="{% url 'consulta_list' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
         </div>
-        <div class="col-md-2 mb-3">
-            <a href="{% url 'medico_list' %}" class="btn btn-outline-primary w-100">Médicos</a>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-people display-4 text-success mb-3"></i>
+                <h5 class="card-title">Pacientes</h5>
+                <p class="card-text">Cadastre e gerencie informações dos pacientes</p>
+                <a href="{% url 'paciente_list' %}" class="btn btn-success">
+                    <i class="bi bi-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
         </div>
-        <div class="col-md-2 mb-3">
-            <a href="{% url 'paciente_list' %}" class="btn btn-outline-primary w-100">Pacientes</a>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-person-badge display-4 text-info mb-3"></i>
+                <h5 class="card-title">Médicos</h5>
+                <p class="card-text">Gerencie o cadastro dos médicos</p>
+                <a href="{% url 'medico_list' %}" class="btn btn-info">
+                    <i class="bi bi-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
         </div>
-        <div class="col-md-2 mb-3">
-            <a href="{% url 'consulta_list' %}" class="btn btn-outline-primary w-100">Consultas</a>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-tags display-4 text-warning mb-3"></i>
+                <h5 class="card-title">Especialidades</h5>
+                <p class="card-text">Configure as especialidades médicas</p>
+                <a href="{% url 'especialidade_list' %}" class="btn btn-warning">
+                    <i class="bi bi-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Resumo do Sistema</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="border-end">
+                            <h3 class="text-primary">--</h3>
+                            <p class="text-muted mb-0">Consultas Hoje</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border-end">
+                            <h3 class="text-success">--</h3>
+                            <p class="text-muted mb-0">Pacientes Ativos</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border-end">
+                            <h3 class="text-info">--</h3>
+                            <p class="text-muted mb-0">Médicos Cadastrados</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-warning">--</h3>
+                        <p class="text-muted mb-0">Especialidades</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Ações Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 col-lg-3 mb-2">
+                        <a href="{% url 'consulta_create' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-calendar-plus me-2"></i>Nova Consulta
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-2">
+                        <a href="{% url 'paciente_create' %}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-person-plus me-2"></i>Novo Paciente
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-2">
+                        <a href="{% url 'medico_create' %}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-person-badge-fill me-2"></i>Novo Médico
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-2">
+                        <a href="{% url 'especialidade_create' %}" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-tag-fill me-2"></i>Nova Especialidade
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

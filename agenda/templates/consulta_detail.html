@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Consulta - {{ consulta.paciente.nome }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <h1><i class="bi bi-calendar-check me-3"></i>Detalhes da Consulta</h1>
+    <p class="lead">{{ consulta.paciente.nome }} - {{ consulta.medico.nome }}</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Informações da Consulta</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Data da Consulta</h6>
+                        <p class="fs-5 fw-bold">{{ consulta.data_hora|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Horário</h6>
+                        <p class="fs-5 fw-bold">{{ consulta.data_hora|date:"H:i" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Status</h6>
+                        <p class="fs-5">
+                            <span class="status-badge status-{{ consulta.status }} fs-6">
+                                {{ consulta.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Data de Agendamento</h6>
+                        <p class="fs-6 text-muted">
+                            {% now "d/m/Y H:i" %}
+                        </p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-muted">Observações</h6>
+                        {% if consulta.observacoes %}
+                            <p class="fs-6">{{ consulta.observacoes }}</p>
+                        {% else %}
+                            <p class="text-muted fst-italic">Nenhuma observação registrada.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-person me-2"></i>Paciente</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">{{ consulta.paciente.nome }}</h6>
+                <p class="card-text">
+                    <strong>CPF:</strong> {{ consulta.paciente.cpf }}<br>
+                    <strong>Data de Nascimento:</strong> {{ consulta.paciente.data_nascimento|date:"d/m/Y" }}<br>
+                    {% if consulta.paciente.telefone %}
+                        <strong>Telefone:</strong> {{ consulta.paciente.telefone }}<br>
+                    {% endif %}
+                    {% if consulta.paciente.email %}
+                        <strong>E-mail:</strong> {{ consulta.paciente.email }}
+                    {% endif %}
+                </p>
+                <a href="{% url 'paciente_detail' consulta.paciente.pk %}" class="btn btn-outline-success btn-sm">
+                    Ver Perfil Completo
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Médico</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">{{ consulta.medico.nome }}</h6>
+                <p class="card-text">
+                    <strong>CRM:</strong> {{ consulta.medico.crm }}<br>
+                    <strong>Especialidade:</strong> {{ consulta.medico.especialidade.nome }}<br>
+                    {% if consulta.medico.telefone %}
+                        <strong>Telefone:</strong> {{ consulta.medico.telefone }}<br>
+                    {% endif %}
+                    {% if consulta.medico.email %}
+                        <strong>E-mail:</strong> {{ consulta.medico.email }}
+                    {% endif %}
+                </p>
+                <a href="{% url 'medico_detail' consulta.medico.pk %}" class="btn btn-outline-info btn-sm">
+                    Ver Perfil Completo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <div class="btn-group" role="group">
+            <a href="{% url 'consulta_list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar à Lista
+            </a>
+            <a href="{% url 'consulta_update' consulta.pk %}" class="btn btn-warning">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'consulta_delete' consulta.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash me-2"></i>Excluir
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

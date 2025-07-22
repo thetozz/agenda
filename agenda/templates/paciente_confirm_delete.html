@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir {{ paciente.nome }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="page-header text-center bg-danger">
+    <h1><i class="bi bi-exclamation-triangle me-3"></i>Confirmar Exclusão</h1>
+    <p class="lead">Esta ação não pode ser desfeita</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-trash me-2"></i>Excluir Paciente
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Atenção!</strong> Você está prestes a excluir o paciente:
+                </div>
+                
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ paciente.nome }}</h5>
+                        <p class="card-text">
+                            <strong>CPF:</strong> {{ paciente.cpf }}<br>
+                            <strong>Data de Nascimento:</strong> {{ paciente.data_nascimento|date:"d/m/Y" }}<br>
+                            {% if paciente.telefone %}
+                                <strong>Telefone:</strong> {{ paciente.telefone }}<br>
+                            {% endif %}
+                            {% if paciente.email %}
+                                <strong>E-mail:</strong> {{ paciente.email }}<br>
+                            {% endif %}
+                        </p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar-check me-1"></i>
+                                {{ paciente.consultas.count }} consulta{{ paciente.consultas.count|pluralize }} vinculada{{ paciente.consultas.count|pluralize }}
+                            </small>
+                        </p>
+                    </div>
+                </div>
+
+                {% if paciente.consultas.exists %}
+                    <div class="alert alert-danger mt-3" role="alert">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <strong>Cuidado!</strong> Este paciente possui consultas vinculadas. 
+                        A exclusão também removerá todas as consultas associadas.
+                        
+                        <div class="mt-2">
+                            <strong>Consultas que serão removidas:</strong>
+                            <ul class="mb-0 mt-1">
+                                {% for consulta in paciente.consultas.all|slice:":5" %}
+                                    <li>{{ consulta.medico.nome }} - {{ consulta.data_hora|date:"d/m/Y H:i" }}</li>
+                                {% endfor %}
+                                {% if paciente.consultas.count > 5 %}
+                                    <li><em>... e mais {{ paciente.consultas.count|add:"-5" }} consulta{{ paciente.consultas.count|add:"-5"|pluralize }}</em></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{% url 'paciente_detail' paciente.pk %}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>Sim, Excluir Paciente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+</style>
+{% endblock %}

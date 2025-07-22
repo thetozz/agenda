@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Editar Consulta - {{ block.super }}
+    {% else %}
+        Nova Consulta - {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <h1>
+        <i class="bi bi-calendar-check me-3"></i>
+        {% if form.instance.pk %}
+            Editar Consulta
+        {% else %}
+            Nova Consulta
+        {% endif %}
+    </h1>
+    <p class="lead">
+        {% if form.instance.pk %}
+            Atualize as informações da consulta
+        {% else %}
+            Agende uma nova consulta médica
+        {% endif %}
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-form me-2"></i>Formulário de Consulta
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.paciente.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person me-1"></i>Paciente *
+                                </label>
+                                {{ form.paciente }}
+                                {% if form.paciente.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.paciente.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Selecione o paciente para a consulta
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.medico.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person-badge me-1"></i>Médico *
+                                </label>
+                                {{ form.medico }}
+                                {% if form.medico.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.medico.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Selecione o médico responsável
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.data_hora.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar-event me-1"></i>Data e Hora *
+                                </label>
+                                {{ form.data_hora }}
+                                {% if form.data_hora.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.data_hora.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Selecione a data e horário da consulta
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">
+                                    <i class="bi bi-flag me-1"></i>Status *
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.status.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Status atual da consulta
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.observacoes.id_for_label }}" class="form-label">
+                            <i class="bi bi-text-paragraph me-1"></i>Observações
+                        </label>
+                        {{ form.observacoes }}
+                        {% if form.observacoes.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.observacoes.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Informações adicionais sobre a consulta (opcional)
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'consulta_list' %}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle me-2"></i>
+                            {% if form.instance.pk %}
+                                Atualizar
+                            {% else %}
+                                Agendar
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-lightning me-2"></i>Ações Rápidas</h6>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'paciente_create' %}" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-person-plus me-1"></i>Novo Paciente
+                    </a>
+                    <a href="{% url 'medico_create' %}" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-person-badge-fill me-1"></i>Novo Médico
+                    </a>
+                    <a href="{% url 'especialidade_create' %}" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-tag-fill me-1"></i>Nova Especialidade
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    input[type="datetime-local"] {
+        position: relative;
+    }
+</style>
+{% endblock %}

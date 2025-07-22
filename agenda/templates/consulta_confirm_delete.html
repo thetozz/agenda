@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Consulta - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="page-header text-center bg-danger">
+    <h1><i class="bi bi-exclamation-triangle me-3"></i>Confirmar Exclusão</h1>
+    <p class="lead">Esta ação não pode ser desfeita</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-trash me-2"></i>Excluir Consulta
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Atenção!</strong> Você está prestes a excluir a consulta:
+                </div>
+                
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-calendar-check me-2"></i>
+                            {{ consulta.paciente.nome }} - {{ consulta.medico.nome }}
+                        </h5>
+                        <p class="card-text">
+                            <strong>Data/Hora:</strong> {{ consulta.data_hora|date:"d/m/Y H:i" }}<br>
+                            <strong>Paciente:</strong> {{ consulta.paciente.nome }} (CPF: {{ consulta.paciente.cpf }})<br>
+                            <strong>Médico:</strong> {{ consulta.medico.nome }} (CRM: {{ consulta.medico.crm }})<br>
+                            <strong>Especialidade:</strong> {{ consulta.medico.especialidade.nome }}<br>
+                            <strong>Status:</strong> 
+                            <span class="status-badge status-{{ consulta.status }}">
+                                {{ consulta.get_status_display }}
+                            </span>
+                        </p>
+                        {% if consulta.observacoes %}
+                            <p class="card-text">
+                                <strong>Observações:</strong> {{ consulta.observacoes }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Informação:</strong> A exclusão desta consulta não afetará os dados do paciente ou médico.
+                    Apenas o registro da consulta será removido permanentemente do sistema.
+                </div>
+
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{% url 'consulta_detail' consulta.pk %}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>Sim, Excluir Consulta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+</style>
+{% endblock %}

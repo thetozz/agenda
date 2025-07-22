@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Consultas - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <h1><i class="bi bi-calendar-check me-3"></i>Consultas</h1>
+    <p class="lead">Gerencie as consultas médicas do sistema</p>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Lista de Consultas</h3>
+            <a href="{% url 'consulta_create' %}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Nova Consulta
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                {% if consulta_list %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Paciente</th>
+                                    <th>Médico</th>
+                                    <th>Especialidade</th>
+                                    <th>Data/Hora</th>
+                                    <th>Status</th>
+                                    <th>Observações</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for consulta in consulta_list %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ consulta.paciente.nome }}</strong>
+                                        <br><small class="text-muted">CPF: {{ consulta.paciente.cpf }}</small>
+                                    </td>
+                                    <td>
+                                        <strong>{{ consulta.medico.nome }}</strong>
+                                        <br><small class="text-muted">CRM: {{ consulta.medico.crm }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ consulta.medico.especialidade.nome }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ consulta.data_hora|date:"d/m/Y" }}</strong>
+                                        <br><small class="text-muted">{{ consulta.data_hora|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-{{ consulta.status }}">
+                                            {{ consulta.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if consulta.observacoes %}
+                                            {{ consulta.observacoes|truncatewords:5 }}
+                                        {% else %}
+                                            <em class="text-muted">Sem observações</em>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'consulta_detail' consulta.pk %}" 
+                                               class="btn btn-outline-primary btn-sm" title="Ver detalhes">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'consulta_update' consulta.pk %}" 
+                                               class="btn btn-outline-warning btn-sm" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'consulta_delete' consulta.pk %}" 
+                                               class="btn btn-outline-danger btn-sm" title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-check display-1 text-muted"></i>
+                        <h4 class="mt-3 text-muted">Nenhuma consulta agendada</h4>
+                        <p class="text-muted">Comece agendando uma nova consulta médica.</p>
+                        <a href="{% url 'consulta_create' %}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-2"></i>Agendar Primeira Consulta
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Filter -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Filtros Rápidos</h6>
+            </div>
+            <div class="card-body">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'consulta_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-list me-1"></i>Todas
+                    </a>
+                    <a href="{% url 'consulta_list' %}?status=agendada" class="btn btn-outline-primary">
+                        <i class="bi bi-calendar-plus me-1"></i>Agendadas
+                    </a>
+                    <a href="{% url 'consulta_list' %}?status=realizada" class="btn btn-outline-success">
+                        <i class="bi bi-check-circle me-1"></i>Realizadas
+                    </a>
+                    <a href="{% url 'consulta_list' %}?status=cancelada" class="btn btn-outline-danger">
+                        <i class="bi bi-x-circle me-1"></i>Canceladas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

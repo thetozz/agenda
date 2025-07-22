@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ paciente.nome }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <h1><i class="bi bi-person me-3"></i>{{ paciente.nome }}</h1>
+    <p class="lead">Detalhes do paciente</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Informações do Paciente</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Nome Completo</h6>
+                        <p class="fs-5 fw-bold">{{ paciente.nome }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">CPF</h6>
+                        <p class="fs-5">
+                            <span class="badge bg-secondary fs-6">{{ paciente.cpf }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Data de Nascimento</h6>
+                        <p class="fs-5">{{ paciente.data_nascimento|date:"d/m/Y" }}</p>
+                        <small class="text-muted">
+                            {% now "Y" as current_year %}
+                            {{ current_year|add:"-"|add:paciente.data_nascimento.year }} anos de idade
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Total de Consultas</h6>
+                        <p class="fs-5">
+                            <span class="badge bg-info fs-6">
+                                {{ paciente.consultas.count }} consulta{{ paciente.consultas.count|pluralize }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Telefone</h6>
+                        {% if paciente.telefone %}
+                            <p class="fs-6"><i class="bi bi-telephone me-2"></i>{{ paciente.telefone }}</p>
+                        {% else %}
+                            <p class="text-muted fst-italic">Não informado</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">E-mail</h6>
+                        {% if paciente.email %}
+                            <p class="fs-6"><i class="bi bi-envelope me-2"></i>{{ paciente.email }}</p>
+                        {% else %}
+                            <p class="text-muted fst-italic">Não informado</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if paciente.consultas.exists %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Histórico de Consultas</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Médico</th>
+                                <th>Especialidade</th>
+                                <th>Data/Hora</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for consulta in paciente.consultas.all|slice:":5" %}
+                            <tr>
+                                <td>{{ consulta.medico.nome }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ consulta.medico.especialidade.nome }}</span>
+                                </td>
+                                <td>{{ consulta.data_hora|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ consulta.status }}">
+                                        {{ consulta.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'consulta_detail' consulta.pk %}" class="btn btn-outline-primary btn-sm">
+                                        Ver
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if paciente.consultas.count > 5 %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'consulta_list' %}?paciente={{ paciente.pk }}" class="btn btn-outline-primary">
+                            Ver Todas as Consultas
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <div class="btn-group" role="group">
+            <a href="{% url 'paciente_list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Voltar à Lista
+            </a>
+            <a href="{% url 'paciente_update' paciente.pk %}" class="btn btn-warning">
+                <i class="bi bi-pencil me-2"></i>Editar
+            </a>
+            <a href="{% url 'paciente_delete' paciente.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash me-2"></i>Excluir
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

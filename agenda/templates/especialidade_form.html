@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Editar {{ form.instance.nome }} - {{ block.super }}
+    {% else %}
+        Nova Especialidade - {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <h1>
+        <i class="bi bi-tag me-3"></i>
+        {% if form.instance.pk %}
+            Editar Especialidade
+        {% else %}
+            Nova Especialidade
+        {% endif %}
+    </h1>
+    <p class="lead">
+        {% if form.instance.pk %}
+            Atualize as informações da especialidade médica
+        {% else %}
+            Cadastre uma nova especialidade médica
+        {% endif %}
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-form me-2"></i>Formulário de Especialidade
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.nome.id_for_label }}" class="form-label">
+                            <i class="bi bi-tag me-1"></i>Nome da Especialidade *
+                        </label>
+                        {{ form.nome }}
+                        {% if form.nome.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.nome.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Digite o nome da especialidade médica (ex: Cardiologia, Pediatria, etc.)
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.descricao.id_for_label }}" class="form-label">
+                            <i class="bi bi-text-paragraph me-1"></i>Descrição
+                        </label>
+                        {{ form.descricao }}
+                        {% if form.descricao.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.descricao.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Descreva brevemente a especialidade médica (opcional)
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'especialidade_list' %}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle me-2"></i>
+                            {% if form.instance.pk %}
+                                Atualizar
+                            {% else %}
+                                Cadastrar
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
