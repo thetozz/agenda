@@ -116,6 +116,8 @@ def get_medico_availability(request, medico_id):
     """API endpoint para obter os dias de trabalho e horários disponíveis de um médico"""
     try:
         from datetime import datetime, timedelta
+        from django.utils import timezone
+        import pytz
         
         medico = get_object_or_404(Medico, id=medico_id)
         
@@ -157,10 +159,15 @@ def get_medico_availability(request, medico_id):
                 try:
                     data_obj = datetime.strptime(data_selecionada, '%Y-%m-%d').date()
                     
+                    # Obter timezone local do Brasil
+                    local_tz = pytz.timezone('America/Sao_Paulo')
+                    
                     # Buscar consultas já agendadas para este médico nesta data
+                    # Filtrar apenas consultas ativas (não canceladas)
                     consultas_existentes = Consulta.objects.filter(
                         medico=medico,
-                        data_hora__date=data_obj
+                        data_hora__date=data_obj,
+                        status__in=['agendada', 'realizada']  # Excluir consultas canceladas
                     )
                     
                     # Se estivermos editando uma consulta, excluir ela da verificação
@@ -172,7 +179,22 @@ def get_medico_availability(request, medico_id):
                     
                     # Coletar horários já ocupados
                     for consulta in consultas_existentes:
-                        horarios_ocupados.add(consulta.data_hora.time().strftime('%H:%M'))
+                        # Converter para timezone local antes de extrair o horário
+                        if timezone.is_aware(consulta.data_hora):
+                            # Se o datetime é timezone-aware, converter para local
+                            data_hora_local = consulta.data_hora.astimezone(local_tz)
+                        else:
+                            # Se não é timezone-aware, tornar timezone-aware primeiro
+                            data_hora_naive = timezone.make_aware(consulta.data_hora, local_tz)
+                            data_hora_local = data_hora_naive.astimezone(local_tz)
+                        
+                        horario_consulta = data_hora_local.time().strftime('%H:%M')
+                        horarios_ocupados.add(horario_consulta)
+                        
+                        # Debug: adicionar log para verificar horários ocupados
+                        print(f"Horário ocupado encontrado: {horario_consulta} para consulta ID {consulta.id}")
+                        print(f"  - Original: {consulta.data_hora} (aware: {timezone.is_aware(consulta.data_hora)})")
+                        print(f"  - Local: {data_hora_local}")
                         
                 except ValueError:
                     # Data inválida, ignorar filtragem
@@ -185,6 +207,10 @@ def get_medico_availability(request, medico_id):
                         'value': slot,
                         'display': slot
                     })
+            
+            # Debug: log dos horários disponíveis após filtragem
+            print(f"Horários ocupados: {horarios_ocupados}")
+            print(f"Horários disponíveis após filtragem: {[h['value'] for h in horarios_disponiveis]}")
         
         return JsonResponse({
             'success': True,
