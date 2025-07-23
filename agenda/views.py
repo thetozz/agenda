@@ -1,6 +1,10 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.shortcuts import get_object_or_404
 from .models import Especialidade, Medico, Paciente, Consulta
+from .forms import ConsultaForm, MedicoForm
 
 # Especialidade Views
 class EspecialidadeListView(ListView):
@@ -39,13 +43,13 @@ class MedicoDetailView(DetailView):
 
 class MedicoCreateView(CreateView):
     model = Medico
-    fields = ['nome', 'crm', 'especialidade', 'telefone', 'email']
+    form_class = MedicoForm
     template_name = 'medico_form.html'
     success_url = reverse_lazy('medico_list')
 
 class MedicoUpdateView(UpdateView):
     model = Medico
-    fields = ['nome', 'crm', 'especialidade', 'telefone', 'email']
+    form_class = MedicoForm
     template_name = 'medico_form.html'
     success_url = reverse_lazy('medico_list')
 
@@ -91,13 +95,13 @@ class ConsultaDetailView(DetailView):
 
 class ConsultaCreateView(CreateView):
     model = Consulta
-    fields = ['paciente', 'medico', 'data_hora', 'status', 'observacoes']
+    form_class = ConsultaForm
     template_name = 'consulta_form.html'
     success_url = reverse_lazy('consulta_list')
 
 class ConsultaUpdateView(UpdateView):
     model = Consulta
-    fields = ['paciente', 'medico', 'data_hora', 'status', 'observacoes']
+    form_class = ConsultaForm
     template_name = 'consulta_form.html'
     success_url = reverse_lazy('consulta_list')
 
@@ -105,3 +109,93 @@ class ConsultaDeleteView(DeleteView):
     model = Consulta
     template_name = 'consulta_confirm_delete.html'
     success_url = reverse_lazy('consulta_list')
+
+
+@require_http_methods(["GET"])
+def get_medico_availability(request, medico_id):
+    """API endpoint para obter os dias de trabalho e horários disponíveis de um médico"""
+    try:
+        from datetime import datetime, timedelta
+        
+        medico = get_object_or_404(Medico, id=medico_id)
+        
+        # Obter data selecionada do parâmetro de consulta (se fornecida)
+        data_selecionada = request.GET.get('data')
+        consulta_id = request.GET.get('consulta_id')  # Para edição de consulta existente
+        
+        # Mapear dias da semana para números (0=domingo, 1=segunda, etc.)
+        dias_semana_map = {
+            'domingo': 6,
+            'segunda': 0,
+            'terca': 1,
+            'quarta': 2,
+            'quinta': 3,
+            'sexta': 4,
+            'sabado': 5
+        }
+        
+        dias_trabalho = medico.dias_trabalho.split(',')
+        dias_disponiveis = [dias_semana_map.get(dia.strip()) for dia in dias_trabalho if dia.strip() in dias_semana_map]
+        
+        # Gerar horários disponíveis em intervalos de 45 minutos
+        horarios_disponiveis = []
+        if medico.hora_inicio and medico.hora_fim:
+            # Converter hora_inicio para datetime para facilitar cálculos
+            inicio = datetime.combine(datetime.today(), medico.hora_inicio)
+            fim = datetime.combine(datetime.today(), medico.hora_fim)
+            
+            # Gerar todos os slots de 45 minutos
+            all_slots = []
+            current_time = inicio
+            while current_time < fim:
+                all_slots.append(current_time.time().strftime('%H:%M'))
+                current_time += timedelta(minutes=45)
+            
+            # Se uma data foi fornecida, verificar consultas já agendadas
+            horarios_ocupados = set()
+            if data_selecionada:
+                try:
+                    data_obj = datetime.strptime(data_selecionada, '%Y-%m-%d').date()
+                    
+                    # Buscar consultas já agendadas para este médico nesta data
+                    consultas_existentes = Consulta.objects.filter(
+                        medico=medico,
+                        data_hora__date=data_obj
+                    )
+                    
+                    # Se estivermos editando uma consulta, excluir ela da verificação
+                    if consulta_id:
+                        try:
+                            consultas_existentes = consultas_existentes.exclude(id=int(consulta_id))
+                        except (ValueError, TypeError):
+                            pass
+                    
+                    # Coletar horários já ocupados
+                    for consulta in consultas_existentes:
+                        horarios_ocupados.add(consulta.data_hora.time().strftime('%H:%M'))
+                        
+                except ValueError:
+                    # Data inválida, ignorar filtragem
+                    pass
+            
+            # Filtrar horários disponíveis (remover os ocupados)
+            for slot in all_slots:
+                if slot not in horarios_ocupados:
+                    horarios_disponiveis.append({
+                        'value': slot,
+                        'display': slot
+                    })
+        
+        return JsonResponse({
+            'success': True,
+            'dias_disponiveis': dias_disponiveis,
+            'hora_inicio': medico.hora_inicio.strftime('%H:%M'),
+            'hora_fim': medico.hora_fim.strftime('%H:%M'),
+            'horarios_disponiveis': horarios_disponiveis,
+            'dias_trabalho_display': medico.get_dias_trabalho_display()
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })

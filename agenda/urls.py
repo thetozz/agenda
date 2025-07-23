@@ -20,6 +20,7 @@ from .views import (
     ConsultaCreateView,
     ConsultaUpdateView,
     ConsultaDeleteView,
+    get_medico_availability,
 )
 
 urlpatterns = [

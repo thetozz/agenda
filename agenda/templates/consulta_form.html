@@ -81,22 +81,47 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="{{ form.data_hora.id_for_label }}" class="form-label">
-                                    <i class="bi bi-calendar-event me-1"></i>Data e Hora *
+                                <label for="{{ form.data.id_for_label }}" class="form-label">
+                                    <i class="bi bi-calendar-event me-1"></i>Data da Consulta *
                                 </label>
-                                {{ form.data_hora }}
-                                {% if form.data_hora.errors %}
+                                {{ form.data }}
+                                {% if form.data.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {% for error in form.data_hora.errors %}
+                                        {% for error in form.data.errors %}
                                             {{ error }}
                                         {% endfor %}
                                     </div>
                                 {% endif %}
                                 <div class="form-text">
-                                    Selecione a data e horário da consulta
+                                    Selecione a data da consulta
+                                </div>
+                                <div id="medico-info" class="alert alert-info mt-2" style="display: none;">
+                                    <small><strong>Horário de atendimento:</strong> <span id="horario-atendimento"></span></small><br>
+                                    <small><strong>Dias de trabalho:</strong> <span id="dias-trabalho"></span></small>
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.hora.id_for_label }}" class="form-label">
+                                    <i class="bi bi-clock me-1"></i>Horário da Consulta *
+                                </label>
+                                {{ form.hora }}
+                                {% if form.hora.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.hora.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    Selecione o horário da consulta
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="{{ form.status.id_for_label }}" class="form-label">
@@ -152,6 +177,148 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const medicoSelect = document.getElementById('id_medico');
+    const dataInput = document.getElementById('id_data');
+    const horaInput = document.getElementById('id_hora');
+    const medicoInfo = document.getElementById('medico-info');
+    const horarioAtendimento = document.getElementById('horario-atendimento');
+    const diasTrabalho = document.getElementById('dias-trabalho');
+    
+    let diasDisponiveis = [];
+    let horaInicio = null;
+    let horaFim = null;
+    
+    // Função para desabilitar dias indisponíveis
+    function updateDateAvailability() {
+        if (diasDisponiveis.length === 0) {
+            dataInput.disabled = true;
+            return;
+        }
+        
+        dataInput.disabled = false;
+        
+        // Adicionar listener para validar a data selecionada
+        dataInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const dayOfWeek = selectedDate.getDay(); // 0=domingo, 1=segunda, etc.
+            
+            if (!diasDisponiveis.includes(dayOfWeek)) {
+                alert('O médico selecionado não atende neste dia da semana. Por favor, selecione outro dia.');
+                this.value = '';
+            }
+        });
+    }
+    
+    // Função para popular opções de horário
+    function updateTimeAvailability(horariosDisponiveis) {
+        // Limpar opções existentes
+        horaInput.innerHTML = '<option value="">Selecione um horário</option>';
+        
+        if (!horariosDisponiveis || horariosDisponiveis.length === 0) {
+            horaInput.disabled = true;
+            return;
+        }
+        
+        horaInput.disabled = false;
+        
+        // Adicionar opções de horário
+        horariosDisponiveis.forEach(function(horario) {
+            const option = document.createElement('option');
+            option.value = horario.value;
+            option.textContent = horario.display;
+            horaInput.appendChild(option);
+        });
+    }
+    
+    // Listener para mudança de médico
+    medicoSelect.addEventListener('change', function() {
+        const medicoId = this.value;
+        
+        if (!medicoId) {
+            medicoInfo.style.display = 'none';
+            dataInput.disabled = true;
+            horaInput.disabled = true;
+            dataInput.value = '';
+            horaInput.value = '';
+            return;
+        }
+        
+        // Buscar disponibilidade do médico
+        loadMedicoAvailability(medicoId);
+    });
+    
+    // Função para carregar disponibilidade do médico
+    function loadMedicoAvailability(medicoId, selectedDate = null) {
+        let url = `/api/medico/${medicoId}/availability/`;
+        
+        // Adicionar parâmetros de consulta se necessário
+        const params = new URLSearchParams();
+        if (selectedDate) {
+            params.append('data', selectedDate);
+        }
+        
+        // Adicionar ID da consulta se estivermos editando
+        const consultaId = document.querySelector('input[name="consulta_id"]');
+        if (consultaId && consultaId.value) {
+            params.append('consulta_id', consultaId.value);
+        }
+        
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    diasDisponiveis = data.dias_disponiveis;
+                    horaInicio = data.hora_inicio;
+                    horaFim = data.hora_fim;
+                    
+                    // Atualizar informações do médico
+                    horarioAtendimento.textContent = `${horaInicio} às ${horaFim}`;
+                    diasTrabalho.textContent = data.dias_trabalho_display;
+                    medicoInfo.style.display = 'block';
+                    
+                    // Atualizar disponibilidade dos campos
+                    updateDateAvailability();
+                    updateTimeAvailability(data.horarios_disponiveis);
+                } else {
+                    alert('Erro ao carregar informações do médico: ' + data.error);
+                    medicoInfo.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao carregar informações do médico.');
+                medicoInfo.style.display = 'none';
+            });
+    }
+    
+    // Listener para mudança de data - atualizar horários disponíveis
+    dataInput.addEventListener('change', function() {
+        const medicoId = medicoSelect.value;
+        const selectedDate = this.value;
+        
+        if (medicoId && selectedDate) {
+            // Recarregar horários disponíveis para a nova data
+            loadMedicoAvailability(medicoId, selectedDate);
+        }
+    });
+    
+    // Inicializar estado dos campos
+    if (!medicoSelect.value) {
+        dataInput.disabled = true;
+        horaInput.disabled = true;
+    } else {
+        // Se já existe um médico selecionado (edição), carregar suas informações
+        medicoSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
 
 <!-- Quick Actions -->
 <div class="row mt-4">
